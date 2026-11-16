@@ -732,7 +732,7 @@ export const CardEditor: React.FC<CardEditorProps> = ({
   return (
     <div className="space-y-6">
       {/* Desktop Locked / Sticky Step Navigator Bar (On mobile, this is locked directly below the Live Preview photo) */}
-      <div className="hidden lg:block lg:sticky lg:top-18 z-30 bg-neutral-900/98 backdrop-blur-md border border-neutral-800 rounded-xl p-2.5 sm:p-3 shadow-xl">
+      <div className="hidden lg:block lg:sticky lg:top-0 z-30 bg-neutral-900/98 backdrop-blur-md border border-neutral-800 rounded-xl p-2.5 sm:p-3 shadow-xl">
         <div className="flex items-center justify-between mb-2 px-0.5">
           <span className="text-[11px] font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
             <Sliders className="w-3.5 h-3.5 text-yellow-400" />

@@ -331,7 +331,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col font-sans">
+    <div className={`${!isMobile ? 'h-screen overflow-hidden' : 'min-h-screen'} bg-neutral-950 text-neutral-100 flex flex-col font-sans`}>
       {/* Toast Notification */}
       {toastMessage && (
         <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-yellow-400 text-neutral-950 px-4 py-2.5 rounded-full font-bold text-xs sm:text-sm shadow-2xl flex items-center gap-2 border border-yellow-300 animate-in fade-in slide-in-from-top-4">
@@ -349,7 +349,7 @@ export default function App() {
       />
 
       {/* Top Navbar - Clean, Compact & Fixed Width: strictly App Icon + Brand Name on left, and Refresh + Login/Logout on right */}
-      <header className="sticky top-0 z-40 bg-neutral-900/95 backdrop-blur-md border-b border-neutral-800 px-3 sm:px-6 py-2.5 w-full">
+      <header className="sticky top-0 shrink-0 z-40 bg-neutral-900/95 backdrop-blur-md border-b border-neutral-800 px-3 sm:px-6 py-2.5 w-full">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
           {/* Brand Icon + Red 'न्यूज़ स्टूडियो' Tag */}
           <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
@@ -423,74 +423,104 @@ export default function App() {
       </header>
 
       {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
+      <main
+        className={`flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 ${
+          !isMobile ? 'min-h-0 overflow-hidden items-stretch' : 'items-start'
+        }`}
+      >
         {/* Left Column: Card Preview */}
-        {/* DESKTOP (lg:): Sticky at top-18, FULL 500px width */}
+        {/* DESKTOP (lg:): Completely FROZEN in viewport while right editor panel scrolls independently */}
         {/* MOBILE (<lg:): LOCKED / STILL at top under header so reporter can see live preview while scrolling steps below */}
         <section
           className={`w-full ${
             isMobile
               ? 'sticky top-[53px] z-30 bg-neutral-950/98 backdrop-blur-md px-2 py-2 -mx-2.5 border-b border-neutral-800 shadow-xl flex flex-col items-center'
-              : 'lg:sticky lg:top-18 lg:z-10 lg:col-span-5 lg:bg-transparent lg:shadow-none lg:border-none lg:p-0 flex flex-col items-center space-y-3'
+              : 'lg:col-span-5 lg:h-full lg:overflow-y-auto lg:bg-transparent lg:shadow-none lg:border-none lg:p-0 flex flex-col items-center justify-start space-y-2.5 pr-1'
           }`}
         >
           {!isMobile ? (
-            /* =================== DESKTOP VIEW (PERMANENT FULL SIZE, NEVER SHRINKS) =================== */
-            <div className="w-full max-w-[500px] flex flex-col items-center space-y-3">
+            /* =================== DESKTOP VIEW (PERMANENTLY FROZEN LEFT PANE) =================== */
+            <div className="w-full max-w-[500px] flex flex-col items-center space-y-2.5">
               <div className="w-full flex items-center justify-between px-1">
                 <span className="text-xs font-bold uppercase tracking-wider text-neutral-300 flex items-center gap-1.5">
                   <Layers className="w-3.5 h-3.5 text-yellow-400" />
                   <span>लाइव कार्ड प्रीव्यू (1080x1350)</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    फ्रीज
+                  </span>
                 </span>
                 <span className="text-[11px] text-neutral-400 font-semibold">4:5 Portrait HD</span>
               </div>
 
-              {/* The Actual News Jacket Card - Always 100% full-sized on PC */}
-              <div className="w-full flex justify-center">
+              {/* The Actual News Jacket Card - Scaled cleanly to stay 100% visible & frozen on PC */}
+              <div
+                className="w-full flex justify-center"
+                style={{
+                  maxWidth:
+                    card.aspectRatio === '9:16'
+                      ? 'min(340px, calc((100vh - 235px) * 0.5625))'
+                      : card.aspectRatio === '1:1'
+                      ? 'min(470px, calc(100vh - 235px))'
+                      : 'min(470px, calc((100vh - 235px) * 0.8))',
+                }}
+              >
                 <CardPreview
                   card={card}
-                  className="w-full max-w-[500px]"
+                  className="w-full"
                   onChange={handleUpdateCard}
                 />
               </div>
 
-              {/* Desktop Quick Action Buttons: 1. डाउनलोड, 2. रिफ्रेश, 3. कैप्शन एंड शेयर */}
-              <div className="w-full grid grid-cols-3 gap-2 pt-1">
+              {/* Desktop Quick Action Buttons: 1. डाउनलोड, 2. कैप्शन, 3. रिफ्रेश, 4. AI टूल्स */}
+              <div className="w-full grid grid-cols-4 gap-2 pt-1">
                 {/* 1. डाउनलोड */}
                 <button
+                  type="button"
                   onClick={handleDownload}
                   disabled={downloading}
-                  className="py-2.5 px-3 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-neutral-950 font-black text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer active:scale-95"
+                  className="py-2.5 px-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 text-neutral-950 font-black text-xs flex items-center justify-center gap-1.5 shadow transition-all cursor-pointer active:scale-95"
                   title="कार्ड डाउनलोड करें (JPG)"
                 >
-                  <Download className="w-4 h-4" />
-                  <span>{downloading ? 'बन रहा है...' : 'डाउनलोड (JPG)'}</span>
+                  <Download className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{downloading ? 'बन रहा है...' : 'डाउनलोड'}</span>
                 </button>
 
-                {/* 2. रिफ्रेश */}
+                {/* 2. कैप्शन */}
+                <button
+                  type="button"
+                  onClick={() => setIsCaptionModalOpen(true)}
+                  className="py-2.5 px-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white font-bold text-xs border border-neutral-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  title="कैप्शन कॉपी व सोशल मीडिया शेयर"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                  <span className="truncate">कैप्शन</span>
+                </button>
+
+                {/* 3. रिफ्रेश */}
                 <button
                   type="button"
                   onClick={handleResetCard}
-                  className="py-2.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white font-bold text-xs border border-neutral-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  className="py-2.5 px-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white font-bold text-xs border border-neutral-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm"
                   title="कार्ड व एआई टूल पूरा रिफ्रेश करें"
                 >
-                  <RefreshCw className="w-4 h-4 text-yellow-400" />
-                  <span>रिफ्रेश</span>
+                  <RefreshCw className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
+                  <span className="truncate">रिफ्रेश</span>
                 </button>
 
-                {/* 3. कैप्शन एंड शेयर */}
+                {/* 4. AI टूल्स */}
                 <button
-                  onClick={() => setIsCaptionModalOpen(true)}
-                  className="py-2.5 px-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white font-bold text-xs border border-neutral-700 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm"
-                  title="कैप्शन कॉपी व सोशल मीडिया शेयर"
+                  type="button"
+                  onClick={() => setIsCommandModalOpen(true)}
+                  className="py-2.5 px-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 font-bold text-xs border border-amber-500/40 flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-95 shadow-sm"
+                  title="AI न्यूज़ लिंक व कमांड टूल खोलें"
                 >
-                  <Share2 className="w-4 h-4 text-green-400" />
-                  <span>कैप्शन एंड शेयर</span>
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span className="truncate">AI टूल्स</span>
                 </button>
               </div>
 
               {/* User info note */}
-              <div className="w-full bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-3 text-[11px] text-neutral-400 flex items-start gap-2">
+              <div className="w-full bg-neutral-900/60 border border-neutral-800/80 rounded-xl p-2.5 text-[11px] text-neutral-400 flex items-start gap-2">
                 <Info className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
                 <p>
                   यह कार्ड बिल्कुल आपके <strong>"ब्रेकिंग न्यूज़ वाला"</strong> सैंपल्स के अनुसार
@@ -588,7 +618,11 @@ export default function App() {
         </section>
 
         {/* Right Column: Controls & Editing Dashboard (7 cols on lg) */}
-        <section className="lg:col-span-7 space-y-6">
+        <section
+          className={`lg:col-span-7 space-y-6 ${
+            !isMobile ? 'h-full overflow-y-auto pr-2 pb-6' : ''
+          }`}
+        >
           <CardEditor
             card={card}
             onChange={handleUpdateCard}
@@ -602,22 +636,39 @@ export default function App() {
             mobileViewMode={mobileViewMode}
             onToggleMobileViewMode={setMobileViewMode}
           />
+
+          {!isMobile && (
+            <footer className="border-t border-neutral-800/80 bg-neutral-900/40 rounded-xl py-4 px-4 text-center text-xs text-neutral-500 flex flex-wrap items-center justify-center gap-2">
+              <span>ब्रेकिंग न्यूज़ वाला ग्राफिक मेकर • उच्च गुणवत्ता 1080x1350 सोशल मीडिया इमेज</span>
+              <span>•</span>
+              <button
+                type="button"
+                onClick={() => setIsUpdateModalOpen(true)}
+                className="text-yellow-400 hover:text-yellow-300 font-bold transition-colors cursor-pointer flex items-center gap-1.5 underline underline-offset-2"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-yellow-400" />
+                <span>ऐप अपडेट (App Update)</span>
+              </button>
+            </footer>
+          )}
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="mt-auto border-t border-neutral-800/80 bg-neutral-900/50 py-4 px-4 sm:px-6 text-center text-xs text-neutral-500 flex flex-col sm:flex-row items-center justify-center gap-2">
-        <span>ब्रेकिंग न्यूज़ वाला ग्राफिक मेकर • उच्च गुणवत्ता 1080x1350 सोशल मीडिया इमेज</span>
-        <span className="hidden sm:inline">•</span>
-        <button
-          type="button"
-          onClick={() => setIsUpdateModalOpen(true)}
-          className="text-yellow-400 hover:text-yellow-300 font-bold transition-colors cursor-pointer flex items-center gap-1.5 underline underline-offset-2"
-        >
-          <Smartphone className="w-3.5 h-3.5 text-yellow-400" />
-          <span>ऐप अपडेट (App Update)</span>
-        </button>
-      </footer>
+      {/* Mobile Footer */}
+      {isMobile && (
+        <footer className="mt-auto border-t border-neutral-800/80 bg-neutral-900/50 py-4 px-4 sm:px-6 text-center text-xs text-neutral-500 flex flex-col sm:flex-row items-center justify-center gap-2">
+          <span>ब्रेकिंग न्यूज़ वाला ग्राफिक मेकर • उच्च गुणवत्ता 1080x1350 सोशल मीडिया इमेज</span>
+          <span className="hidden sm:inline">•</span>
+          <button
+            type="button"
+            onClick={() => setIsUpdateModalOpen(true)}
+            className="text-yellow-400 hover:text-yellow-300 font-bold transition-colors cursor-pointer flex items-center gap-1.5 underline underline-offset-2"
+          >
+            <Smartphone className="w-3.5 h-3.5 text-yellow-400" />
+            <span>ऐप अपडेट (App Update)</span>
+          </button>
+        </footer>
+      )}
 
       {/* Manual Reporter Login Modal */}
       <LoginModal
